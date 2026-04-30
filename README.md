@@ -361,19 +361,55 @@ NEXT_PUBLIC_APP_NAME=RoundLog
 
 ---
 
-## Ordem de Desenvolvimento (Semanas 1 e 2)
+## Estrutura de Pastas (Padrão src/)
 
-**Semana 1 — Base:**
-- [ ] Setup Next.js + Tailwind + shadcn + React Query
-- [ ] Layout autenticado (sidebar, header)
-- [ ] Telas de login e registro
-- [ ] Hook `useAudioRecorder` funcional
-- [ ] Componente `AudioRecorder` com UI
+Ambos os apps devem seguir o padrão de pasta `src/` para os diretórios `app`, `components` e `lib`.
 
-**Semana 2 — MVP:**
-- [ ] Tela de visita médica (gravar + ver resultado)
-- [ ] `ConductCard`, `PendingCard`, `AlertCard`
-- [ ] Dashboard de ala (enfermagem)
-- [ ] `BedCard` com status e condutas do turno
-- [ ] `ExecutionModal` para marcar execução
-- [ ] Tela de passagem de plantão
+```
+apps/
+  web/                        ← App principal (médico, enfermagem, gestão)
+    src/
+      app/
+      components/
+      lib/
+  pwa/                        ← App mobile beira-leito
+    src/
+      app/
+      components/
+      lib/
+```
+
+---
+
+## Status do Projeto e Checklist (Abril 2026)
+
+Este checklist deve ser atualizado conforme as features forem finalizadas.
+
+### 1. Infraestrutura e API
+- [x] Configuração de Variáveis de Ambiente (`.env.local`)
+- [x] Instalação de dependências críticas (`class-variance-authority`, `swc-binary`)
+- [x] Implementação do `apiFetch` com injeção de Token
+- [ ] Implementação de Interceptor para `401 Unauthorized` (Logout automático)
+- [ ] Substituição completa de Mocks por chamadas reais em `lib/api/`
+
+### 2. App Web (Gestão/Médico)
+- [x] Layout autenticado (sidebar, header)
+- [x] Telas de Login e Registro
+- [ ] Dashboard de Ala com polling de 30s
+- [ ] Componente `HandoffReport` funcional
+- [ ] Gráficos de Analytics com `recharts`
+
+### 3. App PWA (Mobile)
+- [x] Estrutura base e navegação
+- [x] Configuração inicial do Manifesto PWA
+- [ ] Gravação de Áudio Mobile (validação em iOS/Android)
+- [ ] App do Familiar (acesso via token)
+- [ ] Notificações Push para condutas atrasadas
+
+---
+
+## Guia de Desenvolvimento Imediato
+
+1.  **Padronização:** Mover as pastas da `apps/web` para dentro de `src/` e atualizar os imports.
+2.  **Fluxo de Áudio:** Integrar o envio do blob de áudio logo após o stop da gravação.
+3.  **Estado Global:** Utilizar o `authStore` para qualquer verificação de permissão no frontend.
