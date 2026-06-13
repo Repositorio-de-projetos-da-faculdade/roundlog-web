@@ -1,43 +1,47 @@
-import { Visit, Conduct, ClinicalAlert } from "./visit";
-import { Patient, Admission } from "./patient";
+// Ward, Bed e dashboard alinhados com API.
+import type { Admission } from "./patient";
+import type { Conduct, ClinicalAlert, Visit } from "./visit";
 
 export interface Ward {
   id: string;
-  name: string;
   hospitalId: string;
-  floor: string;
-  totalBeds: number;
-  activeBeds: number;
+  name: string;
+  floor?: string | null;
+  specialty?: string | null;
 }
+
+export type BedStatus = "AVAILABLE" | "OCCUPIED" | "MAINTENANCE";
 
 export interface Bed {
   id: string;
-  number: string;
   wardId: string;
-  status: "available" | "occupied" | "maintenance" | "cleaning";
-  admissionId?: string | null;
-  admission?: Admission | null;
-  lastVisitAt?: string | null;
-  pendingConducts: Conduct[];
-  alerts: number;
+  code: string;
+  status: BedStatus;
 }
 
-export interface WardDashboard {
-  ward: Ward;
-  beds: Bed[];
-  stats: {
-    totalPatients: number;
-    pendingConducts: number;
-    criticalAlerts: number;
-    visitsToday: number;
-    executionRate: number;
-  };
-  currentShift: "morning" | "afternoon" | "night";
+/** Bed conforme retornado pelo dashboard de enfermagem (/wards/:id/dashboard). */
+export interface DashboardBed extends Bed {
+  admissions: Array<
+    Admission & {
+      patient: { id: string; name: string; dob: string; allergies: string[] };
+      visits: Array<
+        Pick<Visit, "id" | "status" | "startedAt"> & {
+          conducts: Conduct[];
+          pendings: Conduct[];
+          alerts: ClinicalAlert[];
+        }
+      >;
+    }
+  >;
 }
 
-export interface ConductExecution {
-  conductId: string;
-  bedId: string;
+/** Bed simples (GET /wards/:id/beds) com admissões ativas inline. */
+export type BedWithAdmissions = Bed & {
+  admissions: Array<Admission & { patient: { name: string } }>;
+};
+
+export interface ConductExecutionInput {
+  shiftId: string;
   notes?: string;
-  executedBy: string;
+  status: "done" | "partial" | "not_possible";
 }

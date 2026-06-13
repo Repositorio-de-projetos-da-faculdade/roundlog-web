@@ -1,54 +1,29 @@
 import { apiFetch } from "./client";
-import type { AuthResponse, LoginCredentials, RegisterData } from "@/lib/types";
+import type { AuthResponse, LoginCredentials, RegisterData, User } from "@/lib/types";
 
-/**
- * MOCKS para desenvolvimento sem backend
- */
-const MOCK_USER = {
-  id: "user-1",
-  name: "Dr. Ricardo Oliveira",
-  email: "medico@roundlog.com",
-  role: "doctor" as const,
-  hospitalId: "hosp-1",
-  wardIds: ["ward-1"],
-  avatarUrl: null,
-  createdAt: new Date().toISOString(),
-};
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-/** Login do usuário (com Mock para Dev) */
-export const login = async (credentials: LoginCredentials): Promise<AuthResponse> => {
-  // Em desenvolvimento, se o backend não estiver rodando, retornamos o mock
-  if (process.env.NODE_ENV === "development") {
-    console.log("[Mock API] Efetuando login simulado...");
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          user: MOCK_USER,
-          token: "mock-jwt-token",
-        });
-      }, 800); // simula latência de rede
-    });
-  }
-
-  return apiFetch<AuthResponse>(`/auth/login`, {
+export const login = (credentials: LoginCredentials) =>
+  apiFetch<AuthResponse>(`/auth/login`, {
     method: "POST",
     body: JSON.stringify(credentials),
   });
-};
 
-/** Registro de novo usuário */
-export const register = async (data: RegisterData): Promise<AuthResponse> => {
-  if (process.env.NODE_ENV === "development") {
-    return { user: { ...MOCK_USER, ...data, id: "new-user" }, token: "mock-jwt-token" };
-  }
-  return apiFetch<AuthResponse>(`/auth/register`, {
+export const register = (data: RegisterData) =>
+  apiFetch<User>(`/auth/register`, {
     method: "POST",
     body: JSON.stringify(data),
   });
+
+export const logoutApi = async (): Promise<void> => {
+  try {
+    await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+  } catch {
+    // Best effort
+  }
 };
-
-/** Busca dados do usuário autenticado */
-export const getMe = () => apiFetch<AuthResponse["user"]>(`/auth/me`);
-
-/** Logout */
-export const logoutApi = () => apiFetch<void>(`/auth/logout`, { method: "POST" });

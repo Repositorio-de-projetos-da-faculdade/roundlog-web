@@ -1,23 +1,24 @@
 "use client";
 
-import type { Conduct } from "@/lib/types";
+import type { Conduct, Priority } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Clock } from "lucide-react";
 
 interface ConductCardProps {
   conduct: Conduct;
-  onResolve?: (id: string, notes: string) => void;
+  onResolve?: (id: string) => void;
 }
 
-const priorityConfig = {
-  high: { color: "bg-orange-400", label: "Alta" },
-  medium: { color: "bg-yellow-400", label: "Média" },
-  low: { color: "bg-blue-400", label: "Baixa" },
+const priorityConfig: Record<Priority, { color: string; label: string }> = {
+  CRITICAL: { color: "bg-red-500", label: "Crítica" },
+  HIGH: { color: "bg-orange-400", label: "Alta" },
+  MEDIUM: { color: "bg-yellow-400", label: "Média" },
+  LOW: { color: "bg-blue-400", label: "Baixa" },
 };
 
 export function ConductCard({ conduct, onResolve }: ConductCardProps) {
-  const priority = priorityConfig[conduct.priority as keyof typeof priorityConfig] || priorityConfig.low;
+  const priority = priorityConfig[conduct.priority] ?? priorityConfig.LOW;
 
   return (
     <div className="rounded-lg border border-border p-4 space-y-3 transition-colors hover:bg-muted/50">
@@ -31,18 +32,18 @@ export function ConductCard({ conduct, onResolve }: ConductCardProps) {
         </Badge>
       </div>
 
-      {conduct.deadline && (
+      {conduct.deadlineAt && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="h-3 w-3" />
-          <span>Prazo: {new Date(conduct.deadline).toLocaleString("pt-BR")}</span>
+          <span>Prazo: {new Date(conduct.deadlineAt).toLocaleString("pt-BR")}</span>
         </div>
       )}
 
-      {conduct.status === "open" && onResolve && (
+      {conduct.status === "OPEN" && onResolve && (
         <Button
           size="sm"
           variant="outline"
-          onClick={() => onResolve(conduct.id, "")}
+          onClick={() => onResolve(conduct.id)}
           className="w-full text-xs h-8"
         >
           <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
@@ -50,10 +51,9 @@ export function ConductCard({ conduct, onResolve }: ConductCardProps) {
         </Button>
       )}
 
-      {(conduct.status === "executed" || conduct.status === "resolved") && conduct.resolvedAt && (
+      {conduct.status === "RESOLVED" && conduct.resolvedAt && (
         <p className="text-xs text-muted-foreground">
-          ✓ Executado em{" "}
-          {new Date(conduct.resolvedAt).toLocaleString("pt-BR")}
+          ✓ Executado em {new Date(conduct.resolvedAt).toLocaleString("pt-BR")}
         </p>
       )}
     </div>

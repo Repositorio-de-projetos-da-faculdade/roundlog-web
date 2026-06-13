@@ -33,7 +33,7 @@ export default function LoginPage() {
     try {
       const response = await login({ email, password });
       setAuth(response.user, response.token);
-      router.push("/dashboard");
+      router.push("/beds");
     } catch (err) {
       setError(
         err instanceof Error
